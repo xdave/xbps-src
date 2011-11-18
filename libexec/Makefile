@@ -8,11 +8,6 @@ BINS = $(CHROOT_BIN) $(MOUNT_BIN) $(UMOUNT_BIN)
 WFLAGS = -Wall -Werror
 LDFLAGS = -lcap
 
-ifdef IN_CHROOT
-BINS =
-SCRIPTS = doinst-helper.sh
-endif
-
 .PHONY: all
 all: $(BINS)
 
@@ -28,11 +23,15 @@ install:
 	done
 ifdef BINS
 	install -m755 $(MOUNT_BIN) $(DESTDIR)$(LIBEXECDIR)
-	setcap cap_sys_admin=ep $(DESTDIR)$(LIBEXECDIR)/$(MOUNT_BIN)
 	install -m755 $(UMOUNT_BIN) $(DESTDIR)$(LIBEXECDIR)
-	setcap cap_sys_admin=ep $(DESTDIR)$(LIBEXECDIR)/$(UMOUNT_BIN)
 	install -m755 $(CHROOT_BIN) $(DESTDIR)$(LIBEXECDIR)
-	setcap cap_sys_chroot=ep $(DESTDIR)$(LIBEXECDIR)/$(CHROOT_BIN)
+	@echo
+	@echo "WARNING: capabilities must be set manually to some files."
+	@echo "WARNING: run the following command as root to set them:"
+	@echo "setcap cap_sys_admin=ep $(DESTDIR)$(LIBEXECDIR)/$(MOUNT_BIN)"
+	@echo "setcap cap_sys_admin=ep $(DESTDIR)$(LIBEXECDIR)/$(UMOUNT_BIN)"
+	@echo "setcap cap_sys_chroot=ep $(DESTDIR)$(LIBEXECDIR)/$(CHROOT_BIN)"
+	@echo
 endif
 
 .PHONY: uninstall
