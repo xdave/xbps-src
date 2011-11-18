@@ -314,7 +314,7 @@ _EOF
 <key>long_desc</key>
 <string>$long_desc</string>
 <key>packaged-with</key>
-<string>xbps-src $XBPS_SRC_BUILD_VERSION</string>
+<string>xbps-src-$XBPS_SRC_VERSION</string>
 _EOF
 	#
 	# If package sets $dkms_modules, add dkms rundep.
