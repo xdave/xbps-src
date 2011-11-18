@@ -9,7 +9,7 @@ contains multiple subdirs, each one to build a package as its name
 indicates. The following directory structure illustrates it:
  +
 .................................
-  xbps-templates/
+  xbps-packages/
       |
       |-----srcpkgs/
                |
@@ -86,8 +86,8 @@ Additionally if you want to work as 'root':
 
 Starting up
 -----------
-Firstly you'll have to download the `git` repository that contains `xbps-src`
-and the build template files. To clone it with `git` use:
+Firstly you'll have to download the `git` repository that contains
+the build template files (source packages). To clone it with `git` use:
 
 -----------------------------------------------------------------
 $ git clone https://code.google.com/p/xbps.packages xbps-packages
@@ -97,11 +97,13 @@ $ git clone https://code.google.com/p/xbps.packages xbps-packages
 for correct operation, that is accomplished by issuing:
 
 --------------------------------------------------
-$ cd xbps-packages/xbps-src && make install clean
+$ make install clean
 --------------------------------------------------
 
 This will install all files into `/usr/local` by default, can be changed
-by specifying `PREFIX` and `DESTDIR` to make(1).
+by specifying `PREFIX` and `DESTDIR` to make(1). Please note the install
+target needs root permissions to be able to set the POSIX ACLs in
+some required helpers.
 
 Building packages from source
 -----------------------------
