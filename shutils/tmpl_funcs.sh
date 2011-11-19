@@ -24,65 +24,6 @@
 #-
 
 #
-# Shows info about a template.
-#
-info_tmpl()
-{
-	local i=
-
-	for f in $XBPS_COMMONDIR/*.sh; do
-		[ -r ${f} ] && . ${f}
-	done
-
-	echo "pkgname:	$pkgname"
-	echo "version:	$version"
-	[ -n "$revision" ] && echo "revision:	$revision"
-	for i in ${distfiles}; do
-		[ -n "$i" ] && echo "distfiles:	$i"
-	done
-	for i in ${checksum}; do
-		[ -n "$i" ] && echo "checksum:	$i"
-	done
-	[ -n "$noarch" ] && echo "noarch:		yes"
-	echo "maintainer:	$maintainer"
-	[ -n "$homepage" ] && echo "Upstream URL:	$homepage"
-	[ -n "$license" ] && echo "License(s):	$license"
-	[ -n "$build_style" ] && echo "build_style:	$build_style"
-	for i in ${configure_args}; do
-		[ -n "$i" ] && echo "configure_args:	$i"
-	done
-	echo "short_desc:	$short_desc"
-	for i in ${subpackages}; do
-		[ -n "$i" ] && echo "subpackages:	$i"
-	done
-	for i in ${conf_files}; do
-		[ -n "$i" ] && echo "conf_files:	$i"
-	done
-	for i in ${replaces}; do
-		[ -n "$i" ] && echo "replaces:	$i"
-	done
-	for i in ${conflicts}; do
-		[ -n "$i" ] && echo "conflicts:	$i"
-	done
-	echo "$long_desc"
-	echo
-	check_build_depends_pkg
-	if [ $? -eq 0 ]; then
-		echo "This package requires the following build-time dependencies:"
-		for i in ${build_depends}; do
-			echo " $i"
-		done
-	fi
-	if [ -n "${run_depends}" ]; then
-		echo
-		echo "This package requires the folloring run-time dependencies:"
-		for i in ${run_depends}; do
-			echo " $i"
-		done
-	fi
-}
-
-#
 # Resets all vars used by a template.
 #
 reset_tmpl_vars()
