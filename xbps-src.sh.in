@@ -217,24 +217,29 @@ check_config_vars()
 				break
 			fi
 		done
-		[ -z "$cffound" ] && msg_error "cannot find a config file\n"
+		if [ -z "$cffound" ]; then
+			echo "cannot find a config file"
+			exit 1
+		fi
 	fi
 
 	run_file ${XBPS_CONFIG_FILE}
 	export XBPS_CONFIG_FILE=$path_fixed
 
 	if [ ! -f "$XBPS_CONFIG_FILE" ]; then
-		msg_error "cannot find configuration file: $XBPS_CONFIG_FILE\n"
+		echo "cannot find configuration file: $XBPS_CONFIG_FILE"
+		exit 1
 	fi
 
 	for f in XBPS_DISTRIBUTIONDIR XBPS_MASTERDIR; do
 		eval val="\$${f}"
 		if [ -z "$val" ]; then
-			msg_error "'${f}' not set in configuration file!\n"
+			echo "${f} not set in configuration file!"
+			exit 1
 		fi
 	done
 	if [ ! -w "$XBPS_MASTERDIR" ]; then
-		echo "ERROR: not enough perms for masterdir $XBPS_MASTERDIR.\n"
+		echo "ERROR: not enough perms for masterdir $XBPS_MASTERDIR."
 		exit 1
 	fi
 }
