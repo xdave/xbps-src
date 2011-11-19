@@ -11,6 +11,7 @@ all:
 		    -e  "s|@@XBPS_INSTALL_SHAREDIR@@|$(SHAREDIR)|g"	\
 		    -e  "s|@@XBPS_INSTALL_SBINDIR@@|$(SBINDIR)|g"	\
 		    -e	"s|@@XBPS_INSTALL_LIBEXECDIR@@|$(LIBEXECDIR)|g"	\
+		    -e  "s|@@XBPS_SRC_VERSION@@|$(VERSION)|g"		\
 			$$bin.sh.in > $$bin;				\
 	done
 	for dir in $(SUBDIRS); do			\
@@ -42,3 +43,8 @@ uninstall:
 	for dir in $(SUBDIRS); do			\
 		$(MAKE) -C $$dir uninstall || exit 1;	\
 	done
+
+dist:
+	@echo "Building distribution tarball for tag: v$(VERSION) ..."
+	-@git archive --format=tar --prefix=xbps-src-$(VERSION)/ \
+		v$(VERSION) | gzip -9 > ~/xbps-src-$(VERSION).tar.gz

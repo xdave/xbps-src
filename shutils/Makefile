@@ -2,7 +2,6 @@ include ../vars.mk
 
 .PHONY: clean
 clean:
-	-rm -f $(SCRIPTS)
 
 .PHONY: install
 install:

@@ -5,8 +5,8 @@ MOUNT_BIN = capmount
 UMOUNT_BIN = capumount
 CHROOT_BIN = capchroot
 BINS = $(CHROOT_BIN) $(MOUNT_BIN) $(UMOUNT_BIN)
-WFLAGS = -Wall -Werror
-LDFLAGS = -lcap
+CPPFLAGS += -Wall -Werror
+LDFLAGS += -lcap
 
 .PHONY: all
 all: $(BINS)
@@ -21,7 +21,6 @@ install:
 	for bin in $(SCRIPTS); do					\
 		install -m755 $$bin $(DESTDIR)$(LIBEXECDIR);		\
 	done
-ifdef BINS
 	install -m755 $(MOUNT_BIN) $(DESTDIR)$(LIBEXECDIR)
 	install -m755 $(UMOUNT_BIN) $(DESTDIR)$(LIBEXECDIR)
 	install -m755 $(CHROOT_BIN) $(DESTDIR)$(LIBEXECDIR)
@@ -32,7 +31,6 @@ ifdef BINS
 	@echo "setcap cap_sys_admin=ep $(DESTDIR)$(LIBEXECDIR)/$(UMOUNT_BIN)"
 	@echo "setcap cap_sys_chroot=ep $(DESTDIR)$(LIBEXECDIR)/$(CHROOT_BIN)"
 	@echo
-endif
 
 .PHONY: uninstall
 uninstall:
@@ -41,10 +39,10 @@ uninstall:
 	done
 
 $(MOUNT_BIN):
-	$(CC) $(WFLAGS) mount.c $(LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) mount.c $(LDFLAGS) -o $@
 
 $(UMOUNT_BIN):
-	$(CC) $(WFLAGS) umount.c $(LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) umount.c $(LDFLAGS) -o $@
 
 $(CHROOT_BIN):
-	$(CC) $(WFLAGS) chroot.c $(LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) chroot.c $(LDFLAGS) -o $@
