@@ -109,6 +109,11 @@ _EOF
 
 . /usr/local/etc/xbps/xbps-src.conf
 . /usr/local/share/xbps-src/shutils/init_funcs.sh
+
+export XBPS_ETCDIR=/usr/local/etc/xbps
+export XBPS_SHAREDIR=/usr/local/share/xbps-src
+export XBPS_LIBEXECDIR=/usr/local/libexec/xbps-src
+
 set_defvars
 
 PATH=/tools/bin:/usr/local/sbin:/bin:/usr/bin:/sbin
