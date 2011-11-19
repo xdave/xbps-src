@@ -1,3 +1,7 @@
+v6:
+ - Fixed the 'show-deps' target to show dependencies that contain the +
+   character on its pkgname.
+
 v5:
  - Implemented 'show-deps' target to print build or run time dependencies
    for a source package.

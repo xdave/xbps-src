@@ -90,7 +90,7 @@ show_tmpl_deps()
 				unset pkg soname rdep tmpver
 				soname=$(echo "$f"|sed 's|\+|\\+|g')
 				rdep=$(grep -E "^${soname}.*$" $MAPLIB|awk '{print $2}'|head -1)
-				tmpver=$(echo "$rdep"|sed 's/-//g')
+				tmpver=$(echo "$rdep"|sed 's/-//g;s/\+//g')
 				eval pkg=\$pkg_"${tmpver}"
 				if [ -z "$pkg" ]; then
 					eval local pkg_${tmpver}=1
