@@ -1,244 +1,54 @@
-xbps-src - building packages from source
-========================================
+INTRODUCTION
+============
+xbps-src - the XBPS binary package build system.
 
-Introduction
-------------
-`xbps-src` is the utility used by the _X binary package system_ to build
-binary packages from source distribution files. A root directory (`srcpkgs`)
-contains multiple subdirs, each one to build a package as its name
-indicates. The following directory structure illustrates it:
- +
-.................................
-  xbps-packages/
-      |
-      |-----srcpkgs/
-               |
-               |-----binutils/
-               |-----gcc/
-               |-----glibc/
-..................................
+xbps-src uses ideas from other current package build systems and or
+utilities such as in NetBSD/pkgsrc, Debian dpkg/deb, GNU stow, etc.
+Its target OS is Linux, meant to be used in Void GNU/Linux but could be
+adapted to other systems with relatively few changes (don't blame me if it
+doesn't work in a random OS).
 
-A package subdirectory always has a `template` file, that are the
-specifications to download and build the binary package from its source files.
-Additionally some packages may have additional subdirs on it: `files`
-and `patches`. The `files` subdir may contain configuration files, or
-any other file required to build the package. The `patches` subdir contains
-patches that are applied to the source before building.
- +
+One of its advantages over other build systems is that you can build the
+XBPS binary packages from any other Linux distribution matching the
+target architecture, i.e Fedora x86_64 for Void GNU/Linux x86_64.
 
-Some packages may provide `subpackages`; they are different binary packages
-that are built from the same source package. Each `subpackage` in the directory
-structure (as shown above) is a symlink to the `real` package subdir, like this:
- +
-....................................
-  srcpkgs/
-     |
-     |-----gcc/
-     |-----libgomp -> gcc
-     |-----libmudflap -> gcc
-     |-----libstdc++ -> gcc
-....................................
+Another advantage is its support for Linux Capabilities (POSIX.1e draft standard).
+With that in place `xbps-src` is able to build binary packages in chroots
+without the need to use elevated permissions (superuser). This feature is
+enabled by default and can be disabled by commenting out the
+XBPS_USE_CAPABILITIES option from its configuration file `xbps-src.conf`.
 
-Each subpackage uses its own `template` build file that is contained in
-the `real` package subdir, and they have exactly the same name than the
-symlink pointing to the `real` package subdir. The following example
-illustrates the structure used by the _udev_ package in the filesystem:
- +
-.......................................
-  srcpkgs/
-    |
-    |-----libgudev-devel -> udev
-    |-----libgudev -> udev
-    |-----libudev-devel -> udev
-    |-----libudev -> udev
-    |-----udev/
-           |----template
-           |----libgudev-devel.template
-           |----libgudev.template
-           |----libudev-devel.template
-           |----libudev.template
-.......................................
- +
+The last highlight from xbps-src is its NRWO feature (New Rshlibs World Order)
+where the run time required shared libraries (SONAMEs) by packages are guessed
+automatically, thus reducing the risk for missing required run time dependencies.
+This also help us to minimize the impact in SONAME major bumps, because we can
+know *exactly* in advance which packages use the affected shared library.
 
-Subpackages use a reduced version of the main `template` build file, because
-the build and main install process is all done in the real `template` file.
-Usually those `<subpkg>.template` files only move files and directories
-to the `subpackage` destination directory, so they are always smaller.
+INSTALLATION
+============
 
-Requirements
-------------
-The following software is required in the host system to install xbps-src
-and its helpers:
+To build xbps-src the libcap-devel pkg (or whatever is called in your distribution)
+must be installed. Additionally the setcap(8) command is also required to set
+the correct capabilities in some helpers.
 
- - GCC, make, sed and libcap (depelopment package and setcap(8) command).
+Simply use the `make && make install clean` sequence to build and install it
+into /usr/local by default. Some variables can be overriden thru make(1)
+variables:
 
-To build binary packages with xbps-src also the following software needs
-to be installed into the host system:
+	- DESTDIR: empty
+	- PREFIX: /usr/local by default
+	- SBINDIR: PREFIX/sbin by default
+	- SHAREDIR: PREFIX/share by default
+	- LIBEXECDIR: PREFIX/libexec by default
+	- ETCDIR: PREFIX/etc/xbps by default
 
- - awk, bash, gcc c++, gettext, patch, texinfo, perl and fakeroot.
- - xbps static utilities, available from http://code.google.com/p/xbps.
-   (use the latest available stable version) or
-   'xbps-bin -y install xbps-static' if using Void GNU/Linux.
+Once you installed it with your desired settings you must set the proper
+capabilities to the helpers, as follows with root permissions:
 
-Additionally if you want to work as 'root':
+	$ setcap cap_sys_admin=ep LIBEXECDIR/xbps-src/capmount
+	$ setcap cap_sys_admin=ep LIBEXECDIR/xbps-src/capumount
+	$ setcap cap_sys_chroot=ep LIBEXECDIR/xbps-src/capchroot
 
- - sudo
+See the USAGE file to know more in how to use xbps-src.
 
-Starting up
------------
-Firstly you'll have to download the `git` repository that contains
-the build template files (source packages). To clone it with `git` use:
-
------------------------------------------------------------------
-$ git clone https://code.google.com/p/xbps.packages xbps-packages
------------------------------------------------------------------
-
-`xbps-src` and its shell utilities need to be installed in a directory
-for correct operation, that is accomplished by issuing:
-
---------------------------------------------------
-$ make install clean
---------------------------------------------------
-
-This will install all files into `/usr/local` by default, can be changed
-by specifying `PREFIX` and `DESTDIR` to make(1). Please note the install
-target needs root permissions to be able to set the POSIX ACLs in
-some required helpers.
-
-Building packages from source
------------------------------
-`xbps-src` always look for a `template` file in current directory, that's what
-it specifies the package build definitions and such. The build templates
-are located in the `srcpkgs` directory, you should change the cwd to the
-directory matching the package that you want to work on, i.e for binutils,
-its directory is `srcpkgs/binutils`.
- +
- +
-
-If configuration file is not specified from the command line with the
-`-c` flag, it will first try to use the default location at
-`/usr/local/etc/xbps-src.conf` (or the installation prefix that was specified
-to the make(1) command), and as last resort in the etc directory of the
-current directory.
- +
- +
-
-To avoid problems with libtool and configure scripts finding stuff that is
-available in the host system, almost all packages must be built inside of a
-chroot. So the first thing would be to create the required set of packages
-that will be used in the chroot:
-
-----------------------------------------------------------------
-$ xbps-src bootstrap
-----------------------------------------------------------------
-
-This will build all required packages via fakeroot in masterdir, therefore you
-can run it as normal user. Once 'xbps-src-chroot' has been built and installed
-into the 'masterdir' all packages will be built inside of the chroot.
- +
- +
-
-'xbps-src' supports building packages in the chroot with your normal user,
-thanks to the *POSIX.1e Capabilities* support in the Linux kernel. To use this
-the target filesystem must support *extended attributes*; right now they
-are supported on almost all Linux filesytems, such as *ext2*, *ext3*, *ext4*,
-*xfs*, and others. This option is enabled by default in *xbps-src.conf*.
- +
- +
-
-I believe it's the most easier and faster way to handle clean dependencies;
-another reason would be that xbps packages are meant to be used in a system and
-not just for ordinary users. So once all packages are built, you can create and
-enter to the chroot with:
-
-----------------------
-$ xbps-src chroot
-----------------------
-
-Press Control + D to exit from the chroot. The following targets will require
-to be done in the chroot (_once base-chroot is installed_):
-*build, configure, install and install-destdir*.
- +
- +
-
-Now let's explain some more about the targets that you can use. To start
-installing packages you should use the install target, all source packages
-are located in the `srcpkgs` directory, so to install glib:
-
-------------------------------------------
-$ cd srcpkgs/<pkgname> && xbps-src install
-------------------------------------------
-
-If the package is properly installed, it will be "stowned" automatically.
-``stowned'' means that this package is available in the master directory,
-on which xpbs has symlinked all files from DESTDIR/<pkgname>.
- +
-
-To remove a currently installed (and stowned) package, you can use:
-
------------------------------------------
-$ cd srcpkgs/<pkgname> && xbps-src remove
------------------------------------------
-
-Please note that when you remove it, the package will also be removed
-from XBPS_DESTDIR and previously `unstowned`.
- +
-
-To stow an already installed package (from XBPS_DESTDIR/<pkgname>):
-
----------------------------------------
-$ cd srcpkgs/<pkgname> && xbps-src stow
----------------------------------------
-
-To unstow an already installed (stowned) package:
-
------------------------------------------
-$ cd srcpkgs/<pkgname> && xbps-src unstow
------------------------------------------
-
-You can also print some stuff about any template build file, e.g:
-
----------------------------------------
-$ cd srcpkgs/<pkgname> && xbps-src info
----------------------------------------
-
-To list installed (stowned) packages, use this:
----------------
-$ xbps-src list
----------------
-
-To only extract the distfiles, without configuring/building/installing:
-
-------------------------------------------
-$ cd srcpkgs/<pkgname> && xbps-src extract
-------------------------------------------
-
-To not remove the build directory after successful installation:
-
----------------------------------------------
-$ cd srcpkgs/<pkgname> && xbps-src -C install
----------------------------------------------
-
-To only fetch the distfile:
-----------------------------------------
-$ cd srcpkgs/<pkgname> && xbps-src fetch
-----------------------------------------
-
-To only install the package, _without_ stowning it into the master directory:
---------------------------------------------------
-$ cd srcpkgs/<pkgname> && xbps-src install-destdir
---------------------------------------------------
-
-To list files installed by a package, note that package must be installed
-into destination directory first:
-------------------------------
-$ xbps-src listfiles <pkgname>
-------------------------------
-
-That should be enough to get you started. If you have any question or
-suggestion about *xbps-src* and the build templates, don't forget that there
-is a mailing list to talk about it on:
-
-http://groups.google.com/xbps
-
-or join us at #xbps on irc.freenode.net.
+	-- Juan RP <xtraeme@gmail.com>

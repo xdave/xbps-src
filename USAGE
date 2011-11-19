@@ -1,0 +1,184 @@
+xbps-src - building XBPS binary packages from source
+====================================================
+
+Introduction
+------------
+`xbps-src` is the utility used by the _X binary package system_ to build
+binary packages from source distribution files. A root directory (`srcpkgs`)
+contains multiple subdirs, each one to build a package as its name
+indicates. The following directory structure illustrates it:
+
+  xbps-packages/
+      |
+      |-----srcpkgs/
+               |
+               |-----binutils/
+               |-----gcc/
+               |-----glibc/
+
+A package subdirectory always has a `template` file, that are the
+specifications to download and build the binary package from its source files.
+Additionally some packages may have additional subdirs on it: `files`
+and `patches`. The `files` subdir may contain configuration files, or
+any other file required to build the package. The `patches` subdir contains
+patches that are applied to the source before building.
+
+Some packages may provide `subpackages`; they are different binary packages
+that are built from the same source package. Each `subpackage` in the directory
+structure (as shown above) is a symlink to the `real` package subdir, like this:
+
+  srcpkgs/
+     |
+     |-----gcc/
+     |-----libgomp -> gcc
+     |-----libmudflap -> gcc
+     |-----libstdc++ -> gcc
+
+Each subpackage uses its own `template` build file that is contained in
+the `real` package subdir, and they have exactly the same name than the
+symlink pointing to the `real` package subdir. The following example
+illustrates the structure used by the _udev_ package in the filesystem:
+
+  srcpkgs/
+    |
+    |-----libgudev-devel -> udev
+    |-----libgudev -> udev
+    |-----libudev-devel -> udev
+    |-----libudev -> udev
+    |-----udev/
+           |----template
+           |----libgudev-devel.template
+           |----libgudev.template
+           |----libudev-devel.template
+           |----libudev.template
+
+Subpackages use a reduced version of the main `template` build file, because
+the build and main install process is all done in the real `template` file.
+Usually those `<subpkg>.template` files only move files and directories
+to the `subpackage` destination directory, so they are always smaller.
+
+Requirements
+------------
+To build binary packages with xbps-src the following software must be
+installed into the host system:
+
+ - awk, bash, gcc c++, gettext, patch, texinfo, perl and fakeroot.
+ - sudo (if you want to build packages as 'root')
+ - xbps static utilities, available from http://code.google.com/p/xbps.
+   (use the latest available stable version) or
+   'xbps-bin -y install xbps-static' if using Void GNU/Linux.
+
+Starting up
+-----------
+Firstly you'll have to download the `git` repository that contains
+the build template files (source packages). To clone it with `git` use:
+
+	$ git clone git://github.com/xtraeme/xbps-packages
+
+It is assumed that `xbps-src` has been already installed and it is
+usable, i.e the configuration file `xbps-src.conf` has been propertly
+changed to suit your needs.
+
+Building packages from source
+-----------------------------
+`xbps-src` always look for a `template` file in current directory, that's what
+it specifies the package build definitions and such. The build templates
+are located in the `srcpkgs` directory, you should change the cwd to the
+directory matching the package that you want to work on, i.e for binutils,
+its directory is `srcpkgs/binutils`.
+
+To avoid problems with libtool and configure scripts finding stuff that is
+available in the host system, almost all packages must be built inside of a
+chroot. So the first thing would be to create the required set of packages
+that will be used in the chroot, i.e a bootstrap:
+
+	$ xbps-src bootstrap
+
+This will build all required packages via fakeroot in masterdir, therefore you
+can run it as normal user (unless you had disabled XBPS_USE_CAPABILITIES in
+the `xbps-src.conf` configuration file). Once the bootstrap has been built and
+installed into the 'masterdir' all packages will be built within the chroot.
+
+Alternatively if you are using Void GNU/Linux you can install a bootstrap
+from binary packages with:
+
+	$ xbps-bin -r /path/to/your/masterdir -y install base-chroot
+
+'xbps-src' supports building packages in the chroot with your normal user,
+thanks to the *POSIX.1e Capabilities* support in the Linux kernel. To use this
+the target filesystem must support *extended attributes*; right now they
+are supported on almost all Linux filesytems, such as *ext2*, *ext3*, *ext4*,
+*xfs*, and others. This option is enabled by default in *xbps-src.conf*.
+
+I believe it's the most easier and faster way to handle clean dependencies;
+another reason would be that xbps packages are meant to be used in a system and
+not just for ordinary users. So once all packages are built, you can create and
+enter to the chroot with:
+
+	$ xbps-src chroot
+
+Press Control + D to exit from the chroot. The following targets will require
+to be done in the chroot (_once base-chroot is installed_):
+*build, configure and install*.
+
+Now let's explain some more about the targets that you can use. To start
+installing packages you should use the install target, all source packages
+are located in the `srcpkgs` directory, so to install glib you can use any
+of the two methos explained below:
+
+	$ cd srcpkgs/<pkgname> && xbps-src install
+	$ xbps-src install <pkgname>
+
+If the package is properly installed, it will be "stowed" automatically.
+``stowed'' means that this package is available in the master directory,
+on which `xbps-src` has symlinked all files from DESTDIR/<pkgname>.
+
+To remove a currently installed (and `stowed`) package, you can use:
+
+	$ xbps-src remove <pkgname>
+
+Please note that when you remove it, the package will be removed
+from DESTDIR (masterdir/destdir) and `stowed`.
+
+To stow an already installed package (from DESTDIR/<pkgname>):
+
+	$ xbps-src stow <pkgname>
+
+To unstow an already installed (stowed) package:
+
+	$ xbps-src unstow <pkgname>
+
+You can also print some stuff about any template build file, e.g:
+
+	$ xbps-src show <pkgname>
+
+To list installed (stowed) packages, use this:
+
+	$ xbps-src list
+
+To only extract the distfiles, without configuring/building/installing:
+
+	$ xbps-src extract <pkgname>
+
+To not remove the build directory after successful installation:
+
+	$ xbps-src -C install <pkgname>
+
+To only fetch the distfile:
+
+	$ xbps-src fetch <pkgname>
+
+To only install the package, _without_ `stowing` it into the master directory:
+
+	$ xbps-src -D install <pkgname>
+
+To list files installed by a package (note that package must be installed
+into destination directory first)
+
+	$ xbps-src show-files <pkgname>
+
+NEED HELP?
+----------
+That should be enough to get you started. If you have any question or
+suggestion about *xbps-src* and the build templates you can chat with us
+at #xbps on irc.freenode.net.
