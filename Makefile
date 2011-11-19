@@ -27,21 +27,21 @@ clean:
 
 .PHONY: install
 install: all
-	install -d $(SBINDIR)
-	for bin in $(BINS); do				\
-		install -m 755 $$bin $(SBINDIR);	\
+	install -d $(DESTDIR)$(SBINDIR)
+	for bin in $(BINS); do					\
+		install -m 755 $$bin $(DESTDIR)$(SBINDIR);	\
 	done
-	for dir in $(SUBDIRS); do			\
-		$(MAKE) -C $$dir install || exit 1;	\
+	for dir in $(SUBDIRS); do				\
+		$(MAKE) -C $$dir install || exit 1;		\
 	done
 
 .PHONY: uninstall
 uninstall:
-	for bin in $(BINS); do				\
-		rm -f $(SBINDIR)/$$bin;			\
+	for bin in $(DESTDIR)$(BINS); do			\
+		rm -f $(DESTDIR)$(SBINDIR)/$$bin;		\
 	done
-	for dir in $(SUBDIRS); do			\
-		$(MAKE) -C $$dir uninstall || exit 1;	\
+	for dir in $(SUBDIRS); do				\
+		$(MAKE) -C $$dir uninstall || exit 1;		\
 	done
 
 dist:
