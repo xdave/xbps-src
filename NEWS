@@ -1,0 +1,5 @@
+v5:
+ - Implemented 'show-deps' target to print build or run time dependencies
+   for a source package.
+ - It's possible to use xbps-src code from non-default PATH by setting the
+   environment variable DESTDIR.
