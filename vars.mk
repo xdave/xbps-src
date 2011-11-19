@@ -1,7 +1,7 @@
 # Common variables.
 
 # Current xbps-src version.
-VERSION	= 3
+VERSION	= 4
 
 PREFIX	?= /usr/local
 #

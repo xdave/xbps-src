@@ -294,9 +294,6 @@ install_xbps_src()
 	install -d ${XBPS_MASTERDIR}/usr/local/share/xbps-src/shutils
 	install -m644 ${XBPS_SHAREDIR}/shutils/*.sh \
 		${XBPS_MASTERDIR}/usr/local/share/xbps-src/shutils
-	install -d ${XBPS_MASTERDIR}/usr/local/share/xbps-src/common
-	install -m644 ${XBPS_SHAREDIR}/common/* \
-		${XBPS_MASTERDIR}/usr/local/share/xbps-src/common
 	install -d ${XBPS_MASTERDIR}/usr/local/share/xbps-src/helpers
 	install -m644 ${XBPS_SHAREDIR}/helpers/*.sh \
 		${XBPS_MASTERDIR}/usr/local/share/xbps-src/helpers
