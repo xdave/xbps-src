@@ -100,12 +100,12 @@ verify_rundeps()
 	# above, the mapping is done thru the mapping_shlib_binpkg.txt file.
 	#
 	for f in ${verify_deps}; do
-		unset j rdep _rdep rdepcnt
+		unset j rdep _rdep rdepcnt soname
 		rdep="$(grep "^${f}.*$" $maplib|awk '{print $2}')"
 		rdepcnt="$(grep "^${f}.*$" $maplib|awk '{print $2}'|wc -l)"
 		if [ -z "$rdep" ]; then
 			# Ignore libs by current pkg
-			soname=$(find ${DESTDIR} -type f -name "$f");
+			soname=$(find ${DESTDIR} -name "$f")
 			if [ -z "$soname" ]; then
 				echo "   SONAME: $f <-> UNKNOWN PKG PLEASE FIX!"
 				broken=1
