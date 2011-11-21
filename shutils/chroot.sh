@@ -132,6 +132,7 @@ prepare_chroot()
 	# Create some required files.
 	cp -f /etc/mtab $XBPS_MASTERDIR/etc
 	cp -f /etc/resolv.conf $XBPS_MASTERDIR/etc
+	cp -f /etc/services $XBPS_MASTERDIR/etc
 	[ -f /etc/localtime ] && cp -f /etc/localtime $XBPS_MASTERDIR/etc
 
 	for f in run/utmp log/btmp log/lastlog log/wtmp; do
@@ -145,7 +146,7 @@ prepare_chroot()
 	cat > $XBPS_MASTERDIR/etc/passwd <<_EOF
 root:x:0:0:root:/root:/bin/bash
 nobody:x:99:99:Unprivileged User:/dev/null:/bin/false
-$(whoami):x:$(id -u):$(id -g):$(whoami) user:/dev/null:/bin/bash
+$(whoami):x:$(id -u):$(id -g):$(whoami) user:/tmp:/bin/xbps-shell
 _EOF
 
 	# Default group list as specified by LFS.
