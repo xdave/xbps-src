@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<!-- DO NOT EDIT THE FOLLOWING LINES -->
+	<string>/host/binpkgs/x86_64</string>
+	<string>/host/binpkgs/i686</string>
+	<string>/host/binpkgs/noarch</string>
+	<string>/host/binpkgs/nonfree/x86_64</string>
+	<string>/host/binpkgs/nonfree/i686</string>
+	<!-- ADD ANY REMOTE REPOSITORY AFTER THIS LINE -->
+</array>
+</plist>

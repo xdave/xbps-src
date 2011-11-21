@@ -1,7 +1,7 @@
 include vars.mk
 
 BINS	= xbps-src
-SUBDIRS	= etc libexec helpers shutils
+SUBDIRS	= etc libexec helpers shutils chroot
 
 .PHONY: all
 all:

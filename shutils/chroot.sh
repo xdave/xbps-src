@@ -214,43 +214,16 @@ create_binsh_symlink()
 
 prepare_binpkg_repos()
 {
-	local repo CONF_FILE
+	local f
 
-	case "${XBPS_VERSION}" in
-	0.1[0-9].[0-9]*)
-		mkdir -p ${XBPS_MASTERDIR}/usr/local/etc/xbps
-		for f in /etc /usr/local/etc; do
-			for conf in conf repositories; do
-				if [ ! -f $XBPS_MASTERDIR/usr/local/etc/xbps/${conf}.plist ]; then
-					[ -d $f ] && cp -f $f/xbps/${conf}.plist \
-						${XBPS_MASTERDIR}/usr/local/etc/xbps
-				fi
-			done
-		done
-		msg_normal "Synchronizing index for remote repositories...\n"
-		${XBPS_REPO_CMD} sync 2>/dev/null
-		;;
-	0.[89].[0-9]*)
-		CONF_FILE=$XBPS_MASTERDIR/usr/local/etc/xbps-conf.plist
-		for f in /etc /usr/local/etc; do
-			if [ -f $f/xbps-conf.plist -a \
-			   ! -f $CONF_FILE ]; then
-				cp -f $f/xbps-conf.plist \
-					${XBPS_MASTERDIR}/usr/local/etc
-			fi
-		done
-		# XBPS utils >= 0.9.0.
-		msg_normal "Synchronizing index for remote repositories...\n"
-		${XBPS_REPO_CMD} sync
-		;;
-	*)
-		for repo in ${XBPS_REPO_LIST}; do
-			${XBPS_REPO_CMD} add ${repo} 2>/dev/null
-			[ $? -ne 0 ] && \
-				msg_warn "Failed to sync pkg-index from ${repo}\n"
-		done
-		;;
-	esac
+	for f in conf repositories; do
+		if [ ! -f ${XBPS_MASTERDIR}/usr/local/etc/xbps/${f}.plist ]; then
+			install -Dm644 ${XBPS_SHAREDIR}/chroot/${f}.plist \
+				${XBPS_MASTERDIR}/usr/local/etc/xbps/${f}.plist
+		fi
+	done
+	msg_normal "Synchronizing index for remote repositories...\n"
+	${XBPS_REPO_CMD} sync 2>/dev/null
 }
 
 create_busybox_links()

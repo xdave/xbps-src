@@ -69,16 +69,7 @@ set_defvars()
 	done
 
 	export XBPS_VERSION=$(xbps-bin.static -V|awk '{print $2}')
-	case "${XBPS_VERSION}" in
-	0.1[0-9].[0-9]*)
-		xbps_conf="-C $XBPS_MASTERDIR/usr/local/etc/xbps"
-		;;
-	0.[89].[0-9]*)
-		# XBPS < 0.10.0
-		xbps_conf="-C $XBPS_MASTERDIR/usr/local/etc/xbps-conf.plist"
-		;;
-	esac
-	xbps_conf="$xbps_conf -c $XBPS_MASTERDIR/host/repocache"
+	xbps_conf="-C $XBPS_MASTERDIR/usr/local/etc/xbps"
 
 	export XBPS_PKGDB_CMD="xbps-uhelper.static -r $XBPS_MASTERDIR"
 	export XBPS_BIN_CMD="xbps-bin.static $xbps_conf -r $XBPS_MASTERDIR"
