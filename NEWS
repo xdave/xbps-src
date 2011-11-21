@@ -1,3 +1,18 @@
+v9:
+ - xbps-src now copies /etc/services to the chroot (masterdir) to make
+   https URLs work with xbps-uhelper.
+ - The home directory of the user running xbps-src for chroot operations
+   has been changed to /tmp.
+ - The changes listed above are *only* applied on newly created chroots.
+
+v8:
+ - xbps-src failed to detect required shlibs from the same package, when
+   them were symlinks and not real files.
+
+v7:
+ - xbps-src now provides required XBPS configuration file for use in
+   chroot operations, adding local repositories by default.
+
 v6:
  - Fixed the 'show-deps' target to show dependencies that contain the +
    character on its pkgname.
